@@ -5,11 +5,15 @@
     <resultMap id="BaseResultMap" type="com.ast.scheduler.common.entity.TaskLog">
         <id column="id" property="id"/>
         <result column="task_id" property="taskId"/>
+        <result column="executor_id" property="executorId"/>
         <result column="trigger_type" property="triggerType"/>
         <result column="start_time" property="startTime"/>
         <result column="end_time" property="endTime"/>
         <result column="duration_ms" property="durationMs"/>
         <result column="status" property="status"/>
+        <result column="input_params" property="inputParams"/>
+        <result column="output_summary" property="outputSummary"/>
+        <result column="log_summary" property="logSummary"/>
         <result column="log_content" property="logContent"/>
         <result column="error_msg" property="errorMsg"/>
         <result column="create_time" property="createTime"/>
@@ -24,8 +28,10 @@
     </select>
 
     <insert id="insert" parameterType="com.ast.scheduler.common.entity.TaskLog" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO t_task_log (task_id, trigger_type, start_time, end_time, duration_ms, status, log_content, error_msg)
-        VALUES (#{taskId}, #{triggerType}, #{startTime}, #{endTime}, #{durationMs}, #{status}, #{logContent}, #{errorMsg})
+        INSERT INTO t_task_log (task_id, executor_id, trigger_type, start_time, end_time, duration_ms, status,
+                                input_params, output_summary, log_summary, log_content, error_msg)
+        VALUES (#{taskId}, #{executorId}, #{triggerType}, #{startTime}, #{endTime}, #{durationMs}, #{status},
+                #{inputParams}, #{outputSummary}, #{logSummary}, #{logContent}, #{errorMsg})
     </insert>
 
     <delete id="deleteById">

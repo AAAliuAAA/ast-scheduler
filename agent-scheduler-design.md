@@ -151,19 +151,38 @@ END;
 CREATE TABLE t_task_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     task_id INTEGER NOT NULL,             -- 任务ID
+    executor_id INTEGER,                  -- 执行器ID
     trigger_type INTEGER,                 -- 触发类型：1-定时 2-手动 3-依赖
     start_time DATETIME,                  -- 开始时间
     end_time DATETIME,                    -- 结束时间
     duration_ms INTEGER,                  -- 执行时长（毫秒）
     status INTEGER,                       -- 状态：1-执行中 2-成功 3-失败 4-超时
+    input_params TEXT,                    -- 任务输入参数
+    output_summary VARCHAR(500),          -- 输出摘要（前500字）
+    log_summary VARCHAR(500),             -- 日志摘要（用于列表展示）
     log_content TEXT,                     -- 日志内容
     error_msg TEXT,                       -- 错误信息
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_log_task_id ON t_task_log(task_id);
+CREATE INDEX idx_log_executor_id ON t_task_log(executor_id);
 CREATE INDEX idx_log_start_time ON t_task_log(start_time);
 CREATE INDEX idx_log_status ON t_task_log(status);
+```
+
+### 3.2.1 执行日志详情表 (t_task_log_detail)
+```sql
+-- 任务执行日志详情表
+CREATE TABLE t_task_log_detail (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    log_id INTEGER NOT NULL,              -- 关联日志ID
+    full_output TEXT,                     -- 完整输出结果
+    full_log TEXT,                        -- 完整执行日志
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_log_detail_log_id ON t_task_log_detail(log_id);
 ```
 
 ### 3.3 Prompt 模板表 (t_prompt_template)

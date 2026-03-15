@@ -64,19 +64,35 @@ END$$
 CREATE TABLE IF NOT EXISTS t_task_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     task_id INTEGER NOT NULL,
+    executor_id INTEGER,
     trigger_type INTEGER,
     start_time DATETIME,
     end_time DATETIME,
     duration_ms INTEGER,
     status INTEGER,
+    input_params TEXT,
+    output_summary VARCHAR(500),
+    log_summary VARCHAR(500),
     log_content TEXT,
     error_msg TEXT,
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP
 )$$
 
 CREATE INDEX IF NOT EXISTS idx_log_task_id ON t_task_log(task_id)$$
+CREATE INDEX IF NOT EXISTS idx_log_executor_id ON t_task_log(executor_id)$$
 CREATE INDEX IF NOT EXISTS idx_log_start_time ON t_task_log(start_time)$$
 CREATE INDEX IF NOT EXISTS idx_log_status ON t_task_log(status)$$
+
+-- 3.1 任务执行日志详情表
+CREATE TABLE IF NOT EXISTS t_task_log_detail (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    log_id INTEGER NOT NULL,
+    full_output TEXT,
+    full_log TEXT,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP
+)$$
+
+CREATE INDEX IF NOT EXISTS idx_log_detail_log_id ON t_task_log_detail(log_id)$$
 
 -- 4. Prompt模板表
 CREATE TABLE IF NOT EXISTS t_prompt_template (

@@ -9,11 +9,15 @@ public class TaskLog {
 
     private Integer id;
     private Integer taskId;
+    private Integer executorId;
     private Integer triggerType;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Integer durationMs;
     private Integer status;
+    private String inputParams;
+    private String outputSummary;
+    private String logSummary;
     private String logContent;
     private String errorMsg;
     private LocalDateTime createTime;
@@ -32,6 +36,14 @@ public class TaskLog {
 
     public void setTaskId(Integer taskId) {
         this.taskId = taskId;
+    }
+
+    public Integer getExecutorId() {
+        return executorId;
+    }
+
+    public void setExecutorId(Integer executorId) {
+        this.executorId = executorId;
     }
 
     public Integer getTriggerType() {
@@ -72,6 +84,30 @@ public class TaskLog {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public String getInputParams() {
+        return inputParams;
+    }
+
+    public void setInputParams(String inputParams) {
+        this.inputParams = inputParams;
+    }
+
+    public String getOutputSummary() {
+        return outputSummary;
+    }
+
+    public void setOutputSummary(String outputSummary) {
+        this.outputSummary = outputSummary;
+    }
+
+    public String getLogSummary() {
+        return logSummary;
+    }
+
+    public void setLogSummary(String logSummary) {
+        this.logSummary = logSummary;
     }
 
     public String getLogContent() {

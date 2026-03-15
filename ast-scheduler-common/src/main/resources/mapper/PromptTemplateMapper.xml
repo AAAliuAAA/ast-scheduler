@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ast.scheduler.common.mapper.PromptTemplateMapper">
+
+    <resultMap id="BaseResultMap" type="com.ast.scheduler.common.entity.PromptTemplate">
+        <id column="id" property="id"/>
+        <result column="template_name" property="templateName"/>
+        <result column="template_desc" property="templateDesc"/>
+        <result column="agent_type" property="agentType"/>
+        <result column="role_definition" property="roleDefinition"/>
+        <result column="rules_template" property="rulesTemplate"/>
+        <result column="prompt_template" property="promptTemplate"/>
+        <result column="variables" property="variables"/>
+        <result column="is_system" property="isSystem"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM t_prompt_template WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM t_prompt_template ORDER BY id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.ast.scheduler.common.entity.PromptTemplate" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_prompt_template (template_name, template_desc, agent_type, role_definition, rules_template,
+                                        prompt_template, variables, is_system)
+        VALUES (#{templateName}, #{templateDesc}, #{agentType}, #{roleDefinition}, #{rulesTemplate},
+                #{promptTemplate}, #{variables}, #{isSystem})
+    </insert>
+
+    <update id="updateById" parameterType="com.ast.scheduler.common.entity.PromptTemplate">
+        UPDATE t_prompt_template
+        SET template_name = #{templateName},
+            template_desc = #{templateDesc},
+            agent_type = #{agentType},
+            role_definition = #{roleDefinition},
+            rules_template = #{rulesTemplate},
+            prompt_template = #{promptTemplate},
+            variables = #{variables},
+            is_system = #{isSystem}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM t_prompt_template WHERE id = #{id}
+    </delete>
+
+</mapper>

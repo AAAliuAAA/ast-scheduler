@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ast.scheduler.common.mapper.UserConfigMapper">
+
+    <resultMap id="BaseResultMap" type="com.ast.scheduler.common.entity.UserConfig">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="language" property="language"/>
+        <result column="theme" property="theme"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT id, username, language, theme, create_time, update_time
+        FROM t_user_config
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.ast.scheduler.common.entity.UserConfig" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_user_config (username, language, theme)
+        VALUES (#{username}, #{language}, #{theme})
+    </insert>
+
+    <update id="updateById" parameterType="com.ast.scheduler.common.entity.UserConfig">
+        UPDATE t_user_config
+        SET username = #{username},
+            language = #{language},
+            theme = #{theme}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM t_user_config WHERE id = #{id}
+    </delete>
+
+</mapper>

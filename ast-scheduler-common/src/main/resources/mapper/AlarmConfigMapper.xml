@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ast.scheduler.common.mapper.AlarmConfigMapper">
+
+    <resultMap id="BaseResultMap" type="com.ast.scheduler.common.entity.AlarmConfig">
+        <id column="id" property="id"/>
+        <result column="config_name" property="configName"/>
+        <result column="alarm_type" property="alarmType"/>
+        <result column="config_json" property="configJson"/>
+        <result column="is_default" property="isDefault"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM t_alarm_config WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM t_alarm_config ORDER BY id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.ast.scheduler.common.entity.AlarmConfig" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_alarm_config (config_name, alarm_type, config_json, is_default, status)
+        VALUES (#{configName}, #{alarmType}, #{configJson}, #{isDefault}, #{status})
+    </insert>
+
+    <update id="updateById" parameterType="com.ast.scheduler.common.entity.AlarmConfig">
+        UPDATE t_alarm_config
+        SET config_name = #{configName},
+            alarm_type = #{alarmType},
+            config_json = #{configJson},
+            is_default = #{isDefault},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM t_alarm_config WHERE id = #{id}
+    </delete>
+
+</mapper>

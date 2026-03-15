@@ -17,6 +17,12 @@
     <dependencies>
         <dependency>
             <groupId>com.ast</groupId>
+            <artifactId>ast-scheduler-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.ast</groupId>
             <artifactId>ast-scheduler-core</artifactId>
             <version>${project.version}</version>
         </dependency>

@@ -118,3 +118,19 @@ AFTER UPDATE ON t_alarm_config
 BEGIN
     UPDATE t_alarm_config SET update_time = CURRENT_TIMESTAMP WHERE id = NEW.id;
 END$$
+
+-- 6. 用户配置表
+CREATE TABLE IF NOT EXISTS t_user_config (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username VARCHAR(100) NOT NULL,
+    language VARCHAR(10) DEFAULT 'zh',
+    theme VARCHAR(20) DEFAULT 'light',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP
+)$$
+
+CREATE TRIGGER IF NOT EXISTS update_user_config_timestamp
+AFTER UPDATE ON t_user_config
+BEGIN
+    UPDATE t_user_config SET update_time = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END$$

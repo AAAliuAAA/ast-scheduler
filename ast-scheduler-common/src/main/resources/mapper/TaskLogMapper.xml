@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ast.scheduler.common.mapper.TaskLogMapper">
+
+    <resultMap id="BaseResultMap" type="com.ast.scheduler.common.entity.TaskLog">
+        <id column="id" property="id"/>
+        <result column="task_id" property="taskId"/>
+        <result column="trigger_type" property="triggerType"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="duration_ms" property="durationMs"/>
+        <result column="status" property="status"/>
+        <result column="log_content" property="logContent"/>
+        <result column="error_msg" property="errorMsg"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM t_task_log WHERE id = #{id}
+    </select>
+
+    <select id="selectByTaskId" resultMap="BaseResultMap">
+        SELECT * FROM t_task_log WHERE task_id = #{taskId} ORDER BY start_time DESC
+    </select>
+
+    <insert id="insert" parameterType="com.ast.scheduler.common.entity.TaskLog" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_task_log (task_id, trigger_type, start_time, end_time, duration_ms, status, log_content, error_msg)
+        VALUES (#{taskId}, #{triggerType}, #{startTime}, #{endTime}, #{durationMs}, #{status}, #{logContent}, #{errorMsg})
+    </insert>
+
+    <delete id="deleteById">
+        DELETE FROM t_task_log WHERE id = #{id}
+    </delete>
+
+</mapper>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ast.scheduler.common.mapper.TaskMapper">
+
+    <resultMap id="BaseResultMap" type="com.ast.scheduler.common.entity.Task">
+        <id column="id" property="id"/>
+        <result column="task_name" property="taskName"/>
+        <result column="task_desc" property="taskDesc"/>
+        <result column="executor_id" property="executorId"/>
+        <result column="prompt_template" property="promptTemplate"/>
+        <result column="agent_role" property="agentRole"/>
+        <result column="agent_rules" property="agentRules"/>
+        <result column="command" property="command"/>
+        <result column="cron_expression" property="cronExpression"/>
+        <result column="timeout_seconds" property="timeoutSeconds"/>
+        <result column="retry_count" property="retryCount"/>
+        <result column="status" property="status"/>
+        <result column="depend_task_id" property="dependTaskId"/>
+        <result column="alarm_email" property="alarmEmail"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM t_task WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM t_task ORDER BY id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.ast.scheduler.common.entity.Task" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_task (task_name, task_desc, executor_id, prompt_template, agent_role, agent_rules,
+                            command, cron_expression, timeout_seconds, retry_count, status, depend_task_id, alarm_email)
+        VALUES (#{taskName}, #{taskDesc}, #{executorId}, #{promptTemplate}, #{agentRole}, #{agentRules},
+                #{command}, #{cronExpression}, #{timeoutSeconds}, #{retryCount}, #{status}, #{dependTaskId}, #{alarmEmail})
+    </insert>
+
+    <update id="updateById" parameterType="com.ast.scheduler.common.entity.Task">
+        UPDATE t_task
+        SET task_name = #{taskName},
+            task_desc = #{taskDesc},
+            executor_id = #{executorId},
+            prompt_template = #{promptTemplate},
+            agent_role = #{agentRole},
+            agent_rules = #{agentRules},
+            command = #{command},
+            cron_expression = #{cronExpression},
+            timeout_seconds = #{timeoutSeconds},
+            retry_count = #{retryCount},
+            status = #{status},
+            depend_task_id = #{dependTaskId},
+            alarm_email = #{alarmEmail}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM t_task WHERE id = #{id}
+    </delete>
+
+</mapper>

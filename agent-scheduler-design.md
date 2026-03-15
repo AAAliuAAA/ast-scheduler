@@ -215,6 +215,26 @@ BEGIN
 END;
 ```
 
+### 3.5 用户配置表 (t_user_config)
+```sql
+-- 用户配置表
+CREATE TABLE t_user_config (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username VARCHAR(100) NOT NULL,       -- 用户名
+    language VARCHAR(10) DEFAULT 'zh',    -- 语言：zh-中文 en-英文
+    theme VARCHAR(20) DEFAULT 'light',    -- 主题：light-明色 dark-暗色
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 自动更新 update_time 触发器
+CREATE TRIGGER update_user_config_timestamp
+AFTER UPDATE ON t_user_config
+BEGIN
+    UPDATE t_user_config SET update_time = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;
+```
+
 ---
 
 ## 四、系统架构

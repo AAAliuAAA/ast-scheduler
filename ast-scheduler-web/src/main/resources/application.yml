@@ -14,6 +14,9 @@ spring:
       mode: always
       schema-locations: classpath:schema.sql
       separator: $$
+  messages:
+    basename: messages
+    encoding: UTF-8
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml

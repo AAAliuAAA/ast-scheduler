@@ -1,0 +1,22 @@
+# Maven
+target/
+*.class
+
+# IDE
+.idea/
+*.iml
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Database
+data/
+*.db
+
+# Generated CSS
+**/static/css/output.css
+
+# OS
+.DS_Store
+Thumbs.db

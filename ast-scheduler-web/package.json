@@ -1,0 +1,13 @@
+{
+  "name": "ast-scheduler-web",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "tailwindcss -i ./src/main/resources/static/css/input.css -o ./src/main/resources/static/css/output.css --watch",
+    "build": "tailwindcss -i ./src/main/resources/static/css/input.css -o ./src/main/resources/static/css/output.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1",
+    "daisyui": "^4.7.2",
+    "@tailwindcss/typography": "^0.5.10"
+  }
+}

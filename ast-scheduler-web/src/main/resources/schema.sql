@@ -18,18 +18,18 @@ CREATE TABLE IF NOT EXISTS t_executor (
     sort_order INTEGER DEFAULT 0,
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+)$$
 
-CREATE INDEX IF NOT EXISTS idx_executor_type ON t_executor(executor_type);
-CREATE INDEX IF NOT EXISTS idx_executor_status ON t_executor(status);
-CREATE INDEX IF NOT EXISTS idx_executor_favorite ON t_executor(is_favorite);
-CREATE INDEX IF NOT EXISTS idx_executor_group ON t_executor(group_name);
+CREATE INDEX IF NOT EXISTS idx_executor_type ON t_executor(executor_type)$$
+CREATE INDEX IF NOT EXISTS idx_executor_status ON t_executor(status)$$
+CREATE INDEX IF NOT EXISTS idx_executor_favorite ON t_executor(is_favorite)$$
+CREATE INDEX IF NOT EXISTS idx_executor_group ON t_executor(group_name)$$
 
 CREATE TRIGGER IF NOT EXISTS update_executor_timestamp
 AFTER UPDATE ON t_executor
 BEGIN
     UPDATE t_executor SET update_time = CURRENT_TIMESTAMP WHERE id = NEW.id;
-END;
+END$$
 
 -- 2. 任务配置表
 CREATE TABLE IF NOT EXISTS t_task (
@@ -49,16 +49,16 @@ CREATE TABLE IF NOT EXISTS t_task (
     alarm_email VARCHAR(200),
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+)$$
 
-CREATE INDEX IF NOT EXISTS idx_task_status ON t_task(status);
-CREATE INDEX IF NOT EXISTS idx_task_executor_id ON t_task(executor_id);
+CREATE INDEX IF NOT EXISTS idx_task_status ON t_task(status)$$
+CREATE INDEX IF NOT EXISTS idx_task_executor_id ON t_task(executor_id)$$
 
 CREATE TRIGGER IF NOT EXISTS update_task_timestamp
 AFTER UPDATE ON t_task
 BEGIN
     UPDATE t_task SET update_time = CURRENT_TIMESTAMP WHERE id = NEW.id;
-END;
+END$$
 
 -- 3. 任务执行日志表
 CREATE TABLE IF NOT EXISTS t_task_log (
@@ -72,11 +72,11 @@ CREATE TABLE IF NOT EXISTS t_task_log (
     log_content TEXT,
     error_msg TEXT,
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+)$$
 
-CREATE INDEX IF NOT EXISTS idx_log_task_id ON t_task_log(task_id);
-CREATE INDEX IF NOT EXISTS idx_log_start_time ON t_task_log(start_time);
-CREATE INDEX IF NOT EXISTS idx_log_status ON t_task_log(status);
+CREATE INDEX IF NOT EXISTS idx_log_task_id ON t_task_log(task_id)$$
+CREATE INDEX IF NOT EXISTS idx_log_start_time ON t_task_log(start_time)$$
+CREATE INDEX IF NOT EXISTS idx_log_status ON t_task_log(status)$$
 
 -- 4. Prompt模板表
 CREATE TABLE IF NOT EXISTS t_prompt_template (
@@ -91,15 +91,15 @@ CREATE TABLE IF NOT EXISTS t_prompt_template (
     is_system INTEGER DEFAULT 0,
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+)$$
 
-CREATE INDEX IF NOT EXISTS idx_template_agent_type ON t_prompt_template(agent_type);
+CREATE INDEX IF NOT EXISTS idx_template_agent_type ON t_prompt_template(agent_type)$$
 
 CREATE TRIGGER IF NOT EXISTS update_prompt_template_timestamp
 AFTER UPDATE ON t_prompt_template
 BEGIN
     UPDATE t_prompt_template SET update_time = CURRENT_TIMESTAMP WHERE id = NEW.id;
-END;
+END$$
 
 -- 5. 告警配置表
 CREATE TABLE IF NOT EXISTS t_alarm_config (
@@ -111,10 +111,10 @@ CREATE TABLE IF NOT EXISTS t_alarm_config (
     status INTEGER DEFAULT 1,
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+)$$
 
 CREATE TRIGGER IF NOT EXISTS update_alarm_config_timestamp
 AFTER UPDATE ON t_alarm_config
 BEGIN
     UPDATE t_alarm_config SET update_time = CURRENT_TIMESTAMP WHERE id = NEW.id;
-END;
+END$$

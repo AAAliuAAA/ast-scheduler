@@ -5,6 +5,7 @@ target/
 # IDE
 .idea/
 .claude/
+tmp/
 *.iml
 
 # Node

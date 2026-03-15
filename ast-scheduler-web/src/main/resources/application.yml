@@ -1,0 +1,40 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ast-scheduler
+  profiles:
+    active: sqlite
+  datasource:
+    url: jdbc:sqlite:./data/scheduler.db
+    driver-class-name: org.sqlite.JDBC
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.ast.scheduler.core.entity
+  configuration:
+    map-underscore-to-camel-case: true
+
+scheduler:
+  pool-size: 10
+  log-retention-days: 30
+
+logging:
+  level:
+    com.ast.scheduler: INFO
+
+#---
+#spring:
+#  config:
+#    activate:
+#      on-profile: mysql
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/agent_scheduler?useUnicode=true&characterEncoding=utf8
+#    username: root
+#    password: your_password
+#    driver-class-name: com.mysql.cj.jdbc.Driver

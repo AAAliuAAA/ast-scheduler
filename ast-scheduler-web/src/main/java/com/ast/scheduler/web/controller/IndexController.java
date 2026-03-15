@@ -10,4 +10,11 @@ public class IndexController {
     public String index() {
         return "dashboard";
     }
+
+    @GetMapping("/agents")
+    public String agents() {
+        return "agents";
+    }
+
+
 }

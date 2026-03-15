@@ -1,126 +1,87 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light" xmlns:th="http://www.thymeleaf.org">
+<html lang="zh" data-theme="light" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="#{app.name} + ' - ' + #{dashboard.title}">AST Scheduler - Dashboard</title>
-    <link rel="stylesheet" href="/css/output.css">
+    <title>Agent Scheduler - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.6.0/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
     <!-- Navbar -->
-    <div class="navbar bg-base-100 shadow-lg">
-        <div class="flex-1">
-            <a class="btn btn-ghost text-xl" th:text="'🤖 ' + #{app.name}">🤖 AST Scheduler</a>
-        </div>
-        <div class="flex-none gap-2">
-            <div class="form-control">
-                <input type="text" th:placeholder="#{nav.search}" placeholder="Search" class="input input-bordered w-24 md:w-auto" />
-            </div>
-            <div class="dropdown dropdown-hover dropdown-end">
-                <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
-                    🌐 <span class="hidden md:inline">Language</span>
-                </div>
-                <ul class="dropdown-content menu bg-base-100 rounded-box z-[1] w-32 p-2 shadow">
-                    <li><a th:href="@{/(lang=en)}">🇺🇸 English</a></li>
-                    <li><a th:href="@{/(lang=zh_CN)}">🇨🇳 中文</a></li>
-                </ul>
-            </div>
-            <div class="dropdown dropdown-end">
-                <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-                    <div class="w-10 rounded-full">
-                        <img alt="User" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" />
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div th:replace="~{fragments :: navbar}"></div>
 
     <div class="drawer lg:drawer-open">
         <input id="drawer" type="checkbox" class="drawer-toggle" />
-        <div class="drawer-content flex flex-col">
-            <!-- Page content -->
-            <div class="p-6">
-                <h1 class="text-3xl font-bold mb-6" th:text="#{dashboard.title}">Dashboard</h1>
+        <div class="drawer-content bg-base-200">
+            <!-- Main Content -->
+            <div class="p-4 lg:p-8 max-w-7xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-3xl font-bold">监控大盘</h1>
+                    <button class="btn btn-primary">新建任务</button>
+                </div>
 
-                <!-- Stats -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <div class="stats shadow">
-                        <div class="stat">
-                            <div class="stat-figure text-primary">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                            </div>
-                            <div class="stat-title" th:text="#{stats.total_tasks}">Total Tasks</div>
-                            <div class="stat-value text-primary">25</div>
-                            <div class="stat-desc" th:text="'21% ' + #{stats.more_than_last_month}">21% more than last month</div>
-                        </div>
+                <!-- Streaming Output Section -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-bold">实时输出</h2>
                     </div>
 
-                    <div class="stats shadow">
-                        <div class="stat">
-                            <div class="stat-figure text-success">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <div class="card bg-base-100 shadow">
+                        <div class="card-body">
+                            <h3 class="card-title">Claude Code</h3>
+                            <p class="text-sm mb-2">状态: 在线 | 最后执行: 2分钟前 | 成功率: 98%</p>
+                            <div class="divider my-2"></div>
+                            <div class="bg-base-200 p-4 rounded min-h-[200px] font-mono text-sm">
+                                <p>流式传输内容将在这里显示...</p>
                             </div>
-                            <div class="stat-title" th:text="#{stats.success_rate}">Success Rate</div>
-                            <div class="stat-value text-success">98%</div>
-                            <div class="stat-desc">↗︎ 2% (30 days)</div>
-                        </div>
-                    </div>
-
-                    <div class="stats shadow">
-                        <div class="stat">
-                            <div class="stat-figure text-info">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                            <div class="card-actions justify-end mt-4">
+                                <button class="btn btn-sm btn-primary">查看详情</button>
                             </div>
-                            <div class="stat-title" th:text="#{stats.executors}">Executors</div>
-                            <div class="stat-value text-info">8</div>
-                            <div class="stat-desc" th:text="'5 ' + #{stats.online}">5 online</div>
-                        </div>
-                    </div>
-
-                    <div class="stats shadow">
-                        <div class="stat">
-                            <div class="stat-figure text-warning">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </div>
-                            <div class="stat-title" th:text="#{stats.running}">Running</div>
-                            <div class="stat-value text-warning">3</div>
-                            <div class="stat-desc" th:text="#{stats.active_tasks}">Active tasks</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Recent Tasks -->
-                <div class="card bg-base-100 shadow-xl">
+                <div class="card bg-base-100 shadow">
                     <div class="card-body">
-                        <h2 class="card-title" th:text="#{recent_tasks.title}">Recent Tasks</h2>
+                        <h2 class="card-title text-2xl mb-4">最近执行任务</h2>
                         <div class="overflow-x-auto">
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th th:text="#{table.task_name}">Task Name</th>
-                                        <th th:text="#{table.executor}">Executor</th>
-                                        <th th:text="#{table.status}">Status</th>
-                                        <th th:text="#{table.last_run}">Last Run</th>
+                                        <th>状态</th>
+                                        <th>任务名称</th>
+                                        <th>Agent</th>
+                                        <th>开始时间</th>
+                                        <th>耗时</th>
+                                        <th>操作</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>Daily Report Generation</td>
-                                        <td>Claude Code</td>
-                                        <td><span class="badge badge-success" th:text="#{status.success}">Success</span></td>
-                                        <td>2 hours ago</td>
+                                        <td><span class="badge badge-success">成功</span></td>
+                                        <td>每日报告</td>
+                                        <td>Claude</td>
+                                        <td>10:00</td>
+                                        <td>2.3s</td>
+                                        <td><button class="btn btn-xs">查看日志</button></td>
                                     </tr>
                                     <tr>
-                                        <td>Data Backup</td>
+                                        <td><span class="badge badge-info">执行中</span></td>
+                                        <td>数据分析</td>
                                         <td>OpenClaw</td>
-                                        <td><span class="badge badge-info" th:text="#{status.running}">Running</span></td>
-                                        <td>Just now</td>
+                                        <td>10:05</td>
+                                        <td>-</td>
+                                        <td><button class="btn btn-xs">查看日志</button></td>
                                     </tr>
                                     <tr>
-                                        <td>Email Notification</td>
-                                        <td>Script</td>
-                                        <td><span class="badge badge-success" th:text="#{status.success}">Success</span></td>
-                                        <td>5 hours ago</td>
+                                        <td><span class="badge badge-error">失败</span></td>
+                                        <td>代码检查</td>
+                                        <td>Python</td>
+                                        <td>09:50</td>
+                                        <td>0.5s</td>
+                                        <td><button class="btn btn-xs">查看日志</button></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -131,17 +92,9 @@
         </div>
 
         <!-- Sidebar -->
-        <div class="drawer-side">
-            <label for="drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-            <ul class="menu p-4 w-64 min-h-full bg-base-200 text-base-content">
-                <li><a class="active" th:text="'📊 ' + #{menu.dashboard}">📊 Dashboard</a></li>
-                <li><a th:text="'⚙️ ' + #{menu.executors}">⚙️ Executors</a></li>
-                <li><a th:text="'📋 ' + #{menu.tasks}">📋 Tasks</a></li>
-                <li><a th:text="'📝 ' + #{menu.logs}">📝 Logs</a></li>
-                <li><a th:text="'🔔 ' + #{menu.alerts}">🔔 Alerts</a></li>
-                <li><a th:text="'⚙️ ' + #{menu.settings}">⚙️ Settings</a></li>
-            </ul>
-        </div>
+        <div th:replace="~{fragments :: sidebar('dashboard')}"></div>
     </div>
+
+    <script th:replace="~{fragments :: theme-script}"></script>
 </body>
 </html>

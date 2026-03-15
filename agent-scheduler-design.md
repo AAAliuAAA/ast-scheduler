@@ -21,14 +21,14 @@
 
 ## 二、核心功能模块
 
-### 2.1 执行器注册中心
+### 2.1 AI Agent 注册中心
 ```
 功能点：
-- 执行器注册（手动配置）
-- 执行器列表展示
+- AI Agent 注册（手动配置）
+- AI Agent 列表展示
 - 健康检测（主动下发测试消息）
-- 执行器状态监控（在线/离线/异常）
-- 执行器分组管理
+- AI Agent 状态监控（在线/离线/异常）
+- AI Agent 分组管理
 ```
 
 ### 2.2 任务管理
@@ -41,7 +41,7 @@
 - 手动触发执行
 ```
 
-### 2.2 Agent 执行器管理
+### 2.3 AI Agent 管理
 ```
 支持的 Agent 类型：
 - Claude Code（通过 CLI 调用）
@@ -77,14 +77,14 @@
 
 ## 三、数据库设计
 
-### 3.1 执行器表 (t_executor)
+### 3.1 AI Agent表 (t_executor)
 ```sql
--- 执行器注册表
+-- AI Agent注册表
 CREATE TABLE t_executor (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    executor_name VARCHAR(100) NOT NULL,  -- 执行器名称
-    executor_type VARCHAR(50) NOT NULL,   -- 执行器类型：CLAUDE_CODE/OPENCLAW/SCRIPT
-    executor_desc VARCHAR(500),           -- 执行器描述
+    executor_name VARCHAR(100) NOT NULL,  -- AI Agent名称
+    executor_type VARCHAR(50) NOT NULL,   -- AI Agent类型：CLAUDE_CODE/OPENCLAW/SCRIPT
+    executor_desc VARCHAR(500),           -- AI Agent描述
     connection_type VARCHAR(50) NOT NULL, -- 连接类型：CLI/API/SSH
     connection_config TEXT,               -- 连接配置JSON
     health_check_command TEXT,            -- 健康检查命令
@@ -93,7 +93,7 @@ CREATE TABLE t_executor (
     favorite_order INTEGER DEFAULT 0,     -- 收藏排序
     last_check_time DATETIME,             -- 最后检测时间
     last_check_result TEXT,               -- 最后检测结果
-    group_name VARCHAR(50) DEFAULT 'default', -- 执行器分组
+    group_name VARCHAR(50) DEFAULT 'default', -- AI Agent分组
     sort_order INTEGER DEFAULT 0,         -- 排序
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -119,7 +119,7 @@ CREATE TABLE t_task (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     task_name VARCHAR(100) NOT NULL,      -- 任务名称
     task_desc VARCHAR(500),               -- 任务描述
-    executor_id INTEGER NOT NULL,         -- 执行器ID
+    executor_id INTEGER NOT NULL,         -- AI Agent ID
     prompt_template TEXT,                 -- Prompt模板
     agent_role VARCHAR(200),              -- Agent角色定义
     agent_rules TEXT,                     -- Agent规则限制
@@ -151,7 +151,7 @@ END;
 CREATE TABLE t_task_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     task_id INTEGER NOT NULL,             -- 任务ID
-    executor_id INTEGER,                  -- 执行器ID
+    executor_id INTEGER,                  -- AI Agent ID
     trigger_type INTEGER,                 -- 触发类型：1-定时 2-手动 3-依赖
     start_time DATETIME,                  -- 开始时间
     end_time DATETIME,                    -- 结束时间
@@ -269,14 +269,16 @@ END;
                    │
 ┌──────────────────▼──────────────────────┐
 │       Service Layer (业务逻辑)           │
+│  - ExecutorService                      │
 │  - TaskService                          │
 │  - SchedulerService                     │
 │  - LogService                           │
 │  - AlarmService                         │
+│  - UserConfigService                    │
 └──────────────────┬──────────────────────┘
                    │
 ┌──────────────────▼──────────────────────┐
-│      Executor Layer (执行器)             │
+│      Executor Layer (AI Agent层)             │
 │  - ClaudeCodeExecutor                   │
 │  - OpenClawExecutor                     │
 │  - ScriptExecutor                       │
@@ -284,9 +286,13 @@ END;
                    │
 ┌──────────────────▼──────────────────────┐
 │         Data Layer (MyBatis)            │
+│  - ExecutorMapper                       │
 │  - TaskMapper                           │
 │  - TaskLogMapper                        │
+│  - TaskLogDetailMapper                  │
+│  - PromptTemplateMapper                 │
 │  - AlarmConfigMapper                    │
+│  - UserConfigMapper                     │
 └─────────────────────────────────────────┘
 ```
 
@@ -301,7 +307,7 @@ END;
 - 处理任务依赖关系
 ```
 
-#### 4.2.2 执行器接口 (AgentExecutor)
+#### 4.2.2 AI Agent接口 (AgentExecutor)
 ```java
 public interface AgentExecutor {
     ExecuteResult execute(Task task, TaskLog taskLog);
@@ -363,12 +369,40 @@ public interface AgentExecutor {
 
 ## 六、页面设计（简洁版）
 
-### 6.1 首页 - 执行器注册中心
+### 6.1 首页 - 监控大盘
 ```
 ┌────────────────────────────────────────────────┐
-│ Agent 调度中心                   [+ 注册执行器]  │
+│ Agent 调度中心 - 监控大盘        [+ 新建任务]    │
 ├────────────────────────────────────────────────┤
-│ 执行器列表                                      │
+│ 收藏的 AI Agent (3)                [管理 AI Agent→]│
+├────────────────────────────────────────────────┤
+│ ┌──────────┐  ┌──────────┐  ┌──────────┐      │
+│ │🟢 Claude │  │🟢 OpenClaw│  │🔴 Python │      │
+│ │  Code    │  │  远程     │  │  脚本    │      │
+│ │          │  │          │  │          │      │
+│ │最后执行: │  │最后执行: │  │最后执行: │      │
+│ │2分钟前   │  │5分钟前   │  │1小时前   │      │
+│ │[查看详情]│  │[查看详情]│  │[查看详情]│      │
+│ └──────────┘  └──────────┘  └──────────┘      │
+├────────────────────────────────────────────────┤
+│ 最近执行任务                                    │
+├────┬──────────┬──────┬──────┬──────┬─────────┤
+│状态│ 任务名称 │ Agent│ 开始 │ 耗时 │ 操作    │
+├────┼──────────┼──────┼──────┼──────┼─────────┤
+│ ✅ │每日报告  │Claude│10:00 │2.3s  │[查看日志]│
+│ ⏳ │数据分析  │Open  │10:05 │执行中│[查看日志]│
+│ ❌ │代码检查  │Python│09:50 │失败  │[查看日志]│
+└────┴──────────┴──────┴──────┴──────┴─────────┘
+
+状态说明：
+✅ 成功  ⏳ 执行中  ❌ 失败  ⏱ 超时
+```
+
+### 6.2 AI Agent 管理页面
+```
+┌────────────────────────────────────────────────┐
+│ My AI Agents                     [+ 注册 AI Agent]│
+├────────────────────────────────────────────────┤
 │ 分组: [全部▼]  类型: [全部▼]  状态: [全部▼]     │
 ├────┬──────┬────────┬──────┬──────┬──────┬─────┤
 │状态│ 名称 │ 类型   │ 分组 │ 最后 │ 操作 │     │
@@ -391,16 +425,16 @@ public interface AgentExecutor {
 🟢 在线  🔴 离线  🟡 未知  🟠 异常
 ```
 
-### 6.2 注册执行器页面
+### 6.3 注册 AI Agent页面
 ```
 ┌────────────────────────────────────────────────┐
-│ 注册执行器                            [保存] [取消]│
+│ 注册 AI Agent                            [保存] [取消]│
 ├────────────────────────────────────────────────┤
 │ 基本信息                                        │
-│ 执行器名称: [___________________________]      │
-│ 执行器描述: [___________________________]      │
-│ 执行器类型: [Claude Code ▼]                   │
-│ 执行器分组: [AI Agent ▼]                      │
+│ AI Agent名称: [___________________________]      │
+│ AI Agent描述: [___________________________]      │
+│ AI Agent类型: [Claude Code ▼]                   │
+│ AI Agent分组: [AI Agent ▼]                      │
 │                                                │
 │ 连接配置                                        │
 │ 连接方式: [CLI ▼]                             │
@@ -420,9 +454,9 @@ public interface AgentExecutor {
 ┌────────────────────────────────────────────────┐
 │ 任务管理                          [+ 新建任务]  │
 ├────────────────────────────────────────────────┤
-│ 搜索: [_______]  执行器: [全部▼]  状态: [全部▼] │
+│ 搜索: [_______]  AI Agent: [全部▼]  状态: [全部▼] │
 ├────┬──────┬────────┬──────┬──────┬──────┬─────┤
-│状态│ 名称 │ 执行器 │ Cron │ 操作 │ 最近 │ 成功│
+│状态│ 名称  AI Agent │ Cron │ 操作 │ 最近 │ 成功│
 │    │      │        │      │      │ 执行 │ 率  │
 ├────┼──────┼────────┼──────┼──────┼──────┼─────┤
 │ ●  │代码  │Claude  │0 9 * │[执行]│2分钟 │ 98% │
@@ -446,8 +480,8 @@ public interface AgentExecutor {
 │ 任务名称: [___________________________]        │
 │ 任务描述: [___________________________]        │
 │                                                │
-│ 执行器配置                                      │
-│ 选择执行器: [Claude Code本地 ▼] 🟢在线        │
+│ AI Agent配置                                      │
+│ 选择AI Agent: [Claude Code本地 ▼] 🟢在线        │
 │                                                │
 │ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ │
 │ Prompt 工程配置  [使用模板▼] [AI辅助生成]      │
@@ -536,7 +570,7 @@ public interface AgentExecutor {
 - 安全扫描助手
 ```
 
-### 6.8 执行器详情页
+### 6.8 AI Agent详情页
 ```
 ┌────────────────────────────────────────────────┐
 │ ← 返回    Claude Code 本地    🟢在线  [⭐已收藏]│
@@ -600,7 +634,7 @@ public interface AgentExecutor {
 ┌────────────────────────────────────────────────┐
 │ 监控大盘                          [设置收藏▼]   │
 ├────────────────────────────────────────────────┤
-│ 收藏的执行器（最多3个）                         │
+│ 收藏的 AI Agent（最多3个）                         │
 │                                                │
 │ ┌──────────────────────────────────────────┐ │
 │ │ 🟢 Claude Code 本地        [详情] [取消收藏]│ │
@@ -639,9 +673,9 @@ public interface AgentExecutor {
 └────────────────────────────────────────────────┘
 
 说明：
-- 点击执行器卡片可跳转到详情页
+- 点击AI Agent卡片可跳转到详情页
 - 流式输出实时刷新（WebSocket）
-- 最多收藏3个执行器
+- 最多收藏3个 AI Agent
 ```
 
 ---
@@ -738,7 +772,7 @@ public void cleanOldLogs() {
 
 ---
 
-## 八、执行器注册中心实现
+## 八、AI Agent注册中心实现
 
 ### 8.1 Prompt 模板服务
 ```java
@@ -892,7 +926,7 @@ public class TaskExecutorService {
 }
 ```
 
-### 8.6 执行器服务（增强版）
+### 8.6 AI Agent服务（增强版）
 ```java
 @Data
 public class Executor {
@@ -911,7 +945,7 @@ public class Executor {
 }
 ```
 
-### 8.2 执行器服务
+### 8.2 AI Agent服务
 ```java
 @Service
 public class ExecutorService {
@@ -919,7 +953,7 @@ public class ExecutorService {
     @Autowired
     private ExecutorMapper executorMapper;
 
-    // 注册执行器
+    // 注册 AI Agent
     public void register(Executor executor) {
         executor.setStatus(0); // 未知状态
         executorMapper.insert(executor);
@@ -987,7 +1021,7 @@ public class ExecutorService {
 }
 ```
 
-### 8.7 执行器控制器（增强版）
+### 8.7 AI Agent控制器（增强版）
 ```java
 @Controller
 @RequestMapping("/executor")
@@ -1004,7 +1038,7 @@ public class ExecutorController {
         return Result.success();
     }
 
-    // 获取收藏的执行器
+    // 获取收藏的 AI Agent
     @GetMapping("/favorites")
     @ResponseBody
     public Result getFavorites() {
@@ -1012,7 +1046,7 @@ public class ExecutorController {
         return Result.success(favorites);
     }
 
-    // 执行器详情页
+    // AI Agent详情页
     @GetMapping("/detail/{id}")
     public String detail(@PathVariable Long id, Model model) {
         Executor executor = executorService.getById(id);
@@ -1052,7 +1086,7 @@ public class ExecutorController {
     @Autowired
     private ExecutorService executorService;
 
-    // 执行器列表页
+    // AI Agent列表页
     @GetMapping("/list")
     public String list(Model model) {
         List<Executor> executors = executorService.listAll();
@@ -1066,7 +1100,7 @@ public class ExecutorController {
         return "executor-form";
     }
 
-    // 保存执行器
+    // 保存 AI Agent
     @PostMapping("/save")
     @ResponseBody
     public Result save(@RequestBody Executor executor) {
@@ -1082,7 +1116,7 @@ public class ExecutorController {
         return Result.success(result);
     }
 
-    // 删除执行器
+    // 删除 AI Agent
     @PostMapping("/delete/{id}")
     @ResponseBody
     public Result delete(@PathVariable Long id) {
@@ -1094,7 +1128,7 @@ public class ExecutorController {
 
 ---
 
-## 九、任务执行实现（基于执行器注册中心）
+## 九、任务执行实现（基于AI Agent注册中心）
 
 ### 9.1 任务执行服务
 ```java
@@ -1105,12 +1139,12 @@ public class TaskExecutorService {
     private ExecutorService executorService;
 
     public void executeTask(Task task) {
-        // 获取执行器配置
+        // 获取AI Agent配置
         Executor executor = executorService.getById(task.getExecutorId());
 
-        // 检查执行器状态
+        // 检查AI Agent状态
         if (executor.getStatus() != 1) {
-            throw new RuntimeException("执行器离线: " + executor.getExecutorName());
+            throw new RuntimeException("AI Agent离线: " + executor.getExecutorName());
         }
 
         // 根据连接类型执行
@@ -1131,7 +1165,7 @@ public class TaskExecutorService {
 }
 ```
 
-### 9.2 原有执行器实现（保留兼容）
+### 9.2 原有 AI Agent实现（保留兼容）
 ```java
 @Component
 public class ClaudeCodeExecutor implements AgentExecutor {
@@ -1179,7 +1213,7 @@ public class ClaudeCodeExecutor implements AgentExecutor {
 }
 ```
 
-### 8.2 OpenClaw 执行器
+### 8.2 OpenClaw AI Agent
 ```java
 @Component
 public class OpenClawExecutor implements AgentExecutor {
@@ -1201,7 +1235,7 @@ public class OpenClawExecutor implements AgentExecutor {
 }
 ```
 
-### 8.3 脚本执行器
+### 8.3 脚本 AI Agent
 ```java
 @Component
 public class ScriptExecutor implements AgentExecutor {
@@ -1292,13 +1326,13 @@ agent-scheduler/
 │   │   ├── WebSocketConfig.java          # WebSocket配置
 │   │   └── MyBatisConfig.java            # MyBatis 配置
 │   ├── controller/
-│   │   ├── ExecutorController.java       # 执行器管理
+│   │   ├── ExecutorController.java       # AI Agent管理
 │   │   ├── TaskController.java           # 任务管理
 │   │   ├── PromptTemplateController.java # Prompt模板
 │   │   ├── LogController.java            # 日志查看
 │   │   └── DashboardController.java      # 监控大盘
 │   ├── service/
-│   │   ├── ExecutorService.java          # 执行器服务
+│   │   ├── ExecutorService.java          # AI Agent服务
 │   │   ├── PromptTemplateService.java    # Prompt服务
 │   │   ├── TaskService.java              # 任务业务
 │   │   ├── SchedulerService.java         # 调度服务
@@ -1330,15 +1364,15 @@ agent-scheduler/
 │   │   └── js/
 │   │       └── prompt-builder.js         # Prompt构建器
 │   └── templates/                        # Thymeleaf 模板
-│       ├── executor-list.html            # 执行器列表
-│       ├── executor-form.html            # 执行器注册
-│       ├── executor-detail.html          # 执行器详情（含实时输出）
+│       ├── executor-list.html            # AI Agent列表
+│       ├── executor-form.html            # AI Agent注册
+│       ├── executor-detail.html          # AI Agent详情（含实时输出）
 │       ├── prompt-template-list.html     # Prompt模板库
 │       ├── prompt-template-form.html     # Prompt模板表单
 │       ├── task-list.html                # 任务列表
 │       ├── task-form.html                # 任务表单（含Prompt引导）
 │       ├── log-view.html                 # 日志查看
-│       └── dashboard.html                # 监控大盘（含收藏执行器）
+│       └── dashboard.html                # 监控大盘（含收藏 AI Agent）
 └── pom.xml
 ```
 
@@ -1483,13 +1517,13 @@ java -jar target/agent-scheduler-1.0.0.jar
 http://localhost:8080
 ```
 
-### 12.3 快速创建第一个执行器和任务
+### 12.3 快速创建第一个 AI Agent和任务
 
-**步骤1：注册执行器**
-1. 访问首页，点击"注册执行器"
-2. 填写执行器信息：
-   - 执行器名称：Claude Code本地
-   - 执行器类型：Claude Code
+**步骤1：注册 AI Agent**
+1. 访问首页，点击"注册 AI Agent"
+2. 填写AI Agent信息：
+   - AI Agent名称：Claude Code本地
+   - AI Agent类型：Claude Code
    - 连接方式：CLI
    - 命令路径：kiro-cli
    - 健康检查命令：kiro-cli chat "ping"
@@ -1500,7 +1534,7 @@ http://localhost:8080
 1. 进入"任务管理"，点击"新建任务"
 2. 填写任务信息：
    - 任务名称：每日代码审查
-   - 选择执行器：Claude Code本地（确保状态为🟢在线）
+   - 选择 AI Agent：Claude Code本地（确保状态为🟢在线）
    - 执行命令：kiro-cli chat "review recent changes"
    - Cron表达式：0 9 * * *（每天9点）
 3. 点击"保存"
@@ -1511,14 +1545,14 @@ http://localhost:8080
 ## 十三、核心优势
 
 ### 13.1 实时监控大盘
-- **收藏执行器**：最多收藏3个常用执行器，置顶显示
+- **收藏 AI Agent**：最多收藏3个常用 AI Agent，置顶显示
 - **流式输出**：WebSocket 实时推送 Agent 执行日志
-- **状态可视化**：一眼看到执行器是否正在运行
-- **快速跳转**：点击卡片直接进入执行器详情页
+- **状态可视化**：一眼看到AI Agent是否正在运行
+- **快速跳转**：点击卡片直接进入AI Agent详情页
 
-### 13.2 执行器详情页
+### 13.2 AI Agent详情页
 - **实时日志流**：正在执行的任务实时显示输出
-- **历史任务列表**：查看该执行器最近的执行记录
+- **历史任务列表**：查看该 AI Agent最近的执行记录
 - **自动滚动**：支持暂停/恢复，方便查看历史输出
 - **一键操作**：复制日志、下载完整记录
 
@@ -1528,15 +1562,15 @@ http://localhost:8080
 - **实时预览**：所见即所得，预览最终发送给 Agent 的命令
 - **AI 辅助生成**：根据任务描述自动生成 Prompt
 
-### 13.4 执行器注册中心
-- **统一管理**：类似 Nacos，集中管理所有 Agent 执行器
-- **健康监控**：主动下发测试消息，实时监控执行器状态
+### 13.4 AI Agent注册中心
+- **统一管理**：类似 Nacos，集中管理所有 AI Agent
+- **健康监控**：主动下发测试消息，实时监控AI Agent状态
 - **灵活配置**：支持 CLI/API/SSH 多种连接方式
 
 ### 13.5 简单易用
 - **零配置启动**：开箱即用，无需复杂配置
 - **直观界面**：Bootstrap 风格，清晰明了
-- **快速上手**：5分钟注册执行器并创建任务
+- **快速上手**：5分钟注册 AI Agent并创建任务
 
 ### 13.6 功能完整
 - **Cron 调度**：支持标准 Cron 表达式
@@ -1593,17 +1627,17 @@ http://localhost:8080
 
 ## 十六、常见问题
 
-**Q1: 如何注册新的执行器？**
-1. 点击首页"注册执行器"
-2. 填写执行器信息和连接配置
+**Q1: 如何注册新的 AI Agent？**
+1. 点击首页"注册 AI Agent"
+2. 填写AI Agent信息和连接配置
 3. 配置健康检查命令
 4. 点击"测试连接"验证
 5. 保存后即可在任务中使用
 
-**Q2: 执行器显示离线怎么办？**
+**Q2: AI Agent显示离线怎么办？**
 - 点击"检测"按钮手动触发健康检查
-- 检查执行器的命令路径是否正确
-- 确认执行器进程是否正在运行
+- 检查 AI Agent的命令路径是否正确
+- 确认 AI Agent进程是否正在运行
 - 查看最后检测结果中的错误信息
 
 **Q3: 如何添加新的连接方式？**
@@ -1618,9 +1652,9 @@ private ExecuteResult executeBySSH(Executor executor, Task task) {
 - 系统会自动记录错误日志
 - 如果配置了重试次数，会自动重试
 - 发送告警通知到指定邮箱
-- 检查执行器状态是否在线
+- 检查AI Agent状态是否在线
 
-**Q5: 如何备份执行器和任务配置？**
+**Q5: 如何备份 AI Agent和任务配置？**
 ```bash
 # 导出配置
 mysqldump -u root -p agent_scheduler t_executor t_task > backup.sql
@@ -1644,30 +1678,30 @@ public void batchHealthCheck() {
 
 这是一个专为个人 Agent 管理设计的轻量级调度系统，核心特点：
 
-✅ **实时监控大盘** - 收藏常用执行器，实时查看 Agent 执行状态和输出
+✅ **实时监控大盘** - 收藏常用 AI Agent，实时查看 Agent 执行状态和输出
 ✅ **流式日志推送** - WebSocket 实时传输，像看直播一样监控 Agent 工作
 ✅ **Prompt 工程引导** - 三段式结构化配置，帮助用户写出高质量 Prompt
-✅ **执行器注册中心** - 类似 Nacos，统一管理所有 Agent
-✅ **健康监控** - 主动检测执行器状态，实时可视化
+✅ **AI Agent注册中心** - 类似 Nacos，统一管理所有 Agent
+✅ **健康监控** - 主动检测AI Agent状态，实时可视化
 ✅ **简单易用** - 5分钟上手，无需学习成本
 
 **核心创新点：**
 
 1. **实时监控体验**
-   - 监控大盘显示收藏的3个执行器
+   - 监控大盘显示收藏的3个 AI Agent
    - 正在执行的任务实时显示流式输出
-   - 点击执行器卡片跳转到详情页
-   - 执行器详情页展示当前任务和历史记录
+   - 点击AI Agent卡片跳转到详情页
+   - AI Agent详情页展示当前任务和历史记录
 
 2. **Prompt 工程可视化**
    - 角色定义、规则限制、Prompt 模板分离
    - 实时预览最终命令
    - 内置提示和最佳实践引导
 
-3. **执行器注册中心**
-   - 执行器与任务解耦，一个执行器可被多个任务复用
+3. **AI Agent注册中心**
+   - AI Agent与任务解耦，一个AI Agent可被多个任务复用
    - 无需 Agent 主动心跳，调度中心主动下发检测命令
-   - 首页直观展示所有执行器状态
+   - 首页直观展示所有AI Agent状态
 
 4. **AI Agent 专属优化**
    - 针对 AI Agent 特性设计的 Prompt 配置界面
